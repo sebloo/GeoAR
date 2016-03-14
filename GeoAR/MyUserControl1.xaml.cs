@@ -17,27 +17,25 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
+// The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace GeoAR
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    public sealed partial class ARRegion : UserControl
+    public sealed partial class MyUserControl1 : UserControl
     {
+        public MyUserControl1()
+        {
+            this.InitializeComponent();
+            initARMode();
+        }
+
         private static Windows.Media.Capture.MediaCapture captureManager;
         private static bool cameraStarted = false;
 
         private bool isLoaded = false;
 
         private ViewModel viewModel;
-
-        public ARRegion()
-        {
-            this.InitializeComponent();
-            initARMode();
-        }
+        
 
         private void initARMode()
         {
@@ -63,7 +61,7 @@ namespace GeoAR
                 captureManager = null;
             }
 
-            var cameraAvailable = await initCameraUnsafe(); // initCamera();
+            var cameraAvailable = await initCamera();
             if (cameraAvailable)
             {
                 await startCamera();
@@ -72,7 +70,7 @@ namespace GeoAR
         }
 
 
-        
+
 
         private void ARRegion_LayoutUpdated(object sender, object e)
         {
@@ -138,7 +136,7 @@ namespace GeoAR
                     {
                         left = ItemCanvas.ActualWidth / 2 * (1 + -symbol.Angle / 22.5);
                     }
-                        double top = (ItemCanvas.ActualHeight - 60) * 0.75;
+                    double top = (ItemCanvas.ActualHeight - 60) * 0.75;
 
                     StringBuilder sb = new StringBuilder();
                     sb.AppendLine(symbol.Name + " : ");
@@ -187,13 +185,13 @@ namespace GeoAR
             }
             return false;
         }
-        
+
 
         private void ARRegion_Unloaded(object sender, RoutedEventArgs e)
         {
             this.isLoaded = false;
         }
-        
+
 
         async private Task<bool> initCamera()
         {
@@ -234,22 +232,6 @@ namespace GeoAR
                 }
             }
             return true;
-        }
-
-        async private Task<bool> initCameraUnsafe()
-        {
-                captureManager = new Windows.Media.Capture.MediaCapture();
-
-                var devices = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(Windows.Devices.Enumeration.DeviceClass.VideoCapture);
-
-              foreach(var device in devices)
-            {
-                var settings = new Windows.Media.Capture.MediaCaptureInitializationSettings();
-                settings.VideoDeviceId = device.Id;
-                await captureManager.InitializeAsync(settings);
-                return true;
-            }
-            return false;
         }
 
         async private Task startCamera()
