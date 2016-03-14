@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Maps.SpatialToolbox;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -21,7 +22,7 @@ namespace GeoAR
         public ObservableCollection<GeoItem> VisibleItems { get; set; }
 
 
-        private double _Range = 100.04;
+        private double _Range = 10.0;
         public double Range
         {
             get { return _Range; }
@@ -276,24 +277,17 @@ namespace GeoAR
                     foreach (var item in Items)
                     {
                         var posAsGeopoint = new Windows.Devices.Geolocation.Geopoint(item.Location.Position);
-                        var symbolHeading = Microsoft.Maps.SpatialToolbox.SpatialTools.CalculateHeading(CurrentPosition, posAsGeopoint);
+                        var itemHeading = SpatialTools.CalculateHeading(CurrentPosition, posAsGeopoint);
 
-                        double angle = CurrentHeading - symbolHeading;
-
+                        double angle = CurrentHeading - itemHeading;
                         if (angle > 180)
-                        {
-                            angle = CurrentHeading - (symbolHeading + 360);
-                        }
+                            angle = CurrentHeading - (itemHeading + 360);
                         else if (angle < -180)
-                        {
-                            angle = CurrentHeading + 360 - symbolHeading;
-                        }
+                            angle = CurrentHeading + 360 - itemHeading;
 
                         if (Math.Abs(angle) <= 22.5)
                         {
-                            //	Debug.WriteLine("Symbol in Sichtfled");
-                            var distance = Microsoft.Maps.SpatialToolbox.SpatialTools.HaversineDistance(CurrentPosition, posAsGeopoint, Microsoft.Maps.SpatialToolbox.SpatialTools.DistanceUnits.KM);
-
+                            var distance = SpatialTools.HaversineDistance(CurrentPosition, posAsGeopoint, SpatialTools.DistanceUnits.KM);
                             if (distance <= this.Range)
                             {
                                 item.Distance = distance;

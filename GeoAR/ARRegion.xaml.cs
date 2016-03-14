@@ -108,8 +108,51 @@ namespace GeoAR
             }
         }
 
-
         internal void UpdateARView()
+        {
+            if (Visibility != Visibility.Visible)
+            {
+                // only proceed if control has height values etc.              
+                return;
+            }
+
+
+            ObservableCollection<GeoItem> visibleItems = viewModel.CalculateItemsInView();
+            ItemCanvas.Children.Clear();
+
+            if (visibleItems != null && visibleItems.Count > 0)
+            {
+                foreach (var symbol in visibleItems)
+                {
+                    double left = 0;
+                    if (symbol.Angle > 0)
+                        left = ItemCanvas.ActualWidth / 2 * ((22.5 - symbol.Angle) / 22.5);
+                    else
+                        left = ItemCanvas.ActualWidth / 2 * (1 + -symbol.Angle / 22.5);
+                    double baseline = (ItemCanvas.ActualHeight - 60);
+                    double top = (baseline) - (baseline * symbol.Distance / this.viewModel.Range);
+
+                    var metaInfoBlock = new TextBlock() {
+                        Text = symbol.Name + " : " + (String.Format("{0:n}", symbol.Distance * 1000) + "m"),
+                        Width = 128,
+                        Height = 50,
+                        TextWrapping =TextWrapping.Wrap };
+
+                    StackPanel arItem = new StackPanel { Orientation = Orientation.Horizontal,
+                        Background = new SolidColorBrush(Colors.White), Opacity = 0.5
+                    };
+
+                    arItem.Children.Add(metaInfoBlock);
+                    
+                    Canvas.SetLeft(arItem, left);
+                    Canvas.SetTop(arItem, top);
+
+                    ItemCanvas.Children.Add(arItem);
+                }
+            }
+        }
+
+        internal void UpdateARViewOverlapping()
         {
             if (Visibility != Visibility.Visible)
             {
@@ -138,7 +181,9 @@ namespace GeoAR
                     {
                         left = ItemCanvas.ActualWidth / 2 * (1 + -symbol.Angle / 22.5);
                     }
-                        double top = (ItemCanvas.ActualHeight - 60) * 0.75;
+                    //double top = (ItemCanvas.ActualHeight - 60) * 0.75;
+                    double baseline = (ItemCanvas.ActualHeight - 60) * 0.75;
+                    double top = (baseline) - (baseline * symbol.Distance / this.viewModel.Range);
 
                     StringBuilder sb = new StringBuilder();
                     sb.AppendLine(symbol.Name + " : ");
